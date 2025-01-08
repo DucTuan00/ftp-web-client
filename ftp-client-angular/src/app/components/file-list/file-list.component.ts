@@ -27,10 +27,10 @@ export class FileListComponent {
   user: string = '';
   password: string = '';
   connected: boolean = false;
-  files: string[] = [];
+  files: { name: string, isFolder: boolean }[] = [];
   selectedFile!: File;
   selectedFiles: string[] = [];
-  //path!: string;
+  currentPath: string = '/Share';
 
   constructor(private ftpService: FtpService) {}
 
@@ -56,20 +56,18 @@ export class FileListComponent {
       alert('Vui lòng kết nối trước!');
       return;
     }
-    this.ftpService.listFiles(this.server, this.port, this.user, this.password)
+    this.ftpService.listFiles(this.server, this.port, this.user, this.password, this.currentPath)
       .subscribe(
         (data) => this.files = data,
         (error) => alert('Lỗi khi lấy danh sách file: ' + error.message)
       );
   }
 
-  getFileType(fileName: string): string {
-    if (!fileName) return 'unknown';
+  getFileType(file: {name: string, isFolder: boolean}): string {
+    if (file.isFolder) return 'folder';
 
-    // Kiểm tra nếu fileName là folder
-    if (!fileName.includes('.')) {
-      return 'folder';
-    }
+    const fileName = file.name;
+    if (!fileName) return 'unknown';
   
     const extension = fileName.split('.').pop()?.toLowerCase();
     if (!extension) return 'unknown';
@@ -121,12 +119,12 @@ export class FileListComponent {
     }
   }
 
-  toggleFileSelection(file: string, event: Event) {
+  toggleFileSelection(file: { name: string, isFolder: boolean }, event: Event) {
     const checkbox = event.target as HTMLInputElement;
     if (checkbox.checked) {
-      this.selectedFiles.push(file);
+      this.selectedFiles.push(file.name);
     } else {
-      this.selectedFiles = this.selectedFiles.filter((f) => f !== file);
+      this.selectedFiles = this.selectedFiles.filter((f) => f !== file.name);
     }
   }
 
@@ -246,44 +244,30 @@ export class FileListComponent {
       });
   }
 
-  // currentPath: string = '/Share';
+  onFolderDoubleClick(file: { name: string, isFolder: boolean }): void {
+    if (!file.isFolder) {
+      return; // Chỉ xử lý khi nhấn vào folder
+    }
+    
+    // Cập nhật đường dẫn hiện tại
+    this.currentPath += `/${file.name}`;
+    console.log('Navigating to:', this.currentPath);
+    
+    // Gửi yêu cầu đến backend để lấy danh sách file bên trong folder
+    this.fetchFiles();
+  }
+  
+  navigateUp(): void {
+    if (this.currentPath === '/Share') return; // Không cho quay lại khi đang ở thư mục gốc
 
-  // onFolderDoubleClick(file: string): void {
-  //   if (this.getFileType(file) !== 'folder') {
-  //     return; // Chỉ xử lý khi nhấn vào folder
-  //   }
+    // Cập nhật đường dẫn về thư mục cha
+    const pathSegments = this.currentPath.split('/');
+    pathSegments.pop(); // Loại bỏ thư mục hiện tại
+    this.currentPath = pathSegments.join('/') || '/Share';
 
-  //   // Cập nhật đường dẫn hiện tại
-  //   this.currentPath += `/${file}`;
-  //   console.log('Navigating to:', this.currentPath);
+    console.log('Navigating up to:', this.currentPath);
 
-  //   // Gửi yêu cầu đến backend để lấy danh sách file bên trong folder
-  //   this.fetchFilesInFolder(this.currentPath);
-  // }
-
-  // fetchFilesInFolder(path: string): void {
-  //   this.ftpService.listFiles(this.server, this.port, this.user, this.password, path).subscribe(
-  //     (response: string[]) => {
-  //       this.files = response; // Cập nhật danh sách file
-  //       console.log('Updated files:', this.files);
-  //     },
-  //     (error) => {
-  //       console.error('Error fetching files:', error);
-  //     }
-  //   );
-  // }
-
-  // navigateUp(): void {
-  //   if (this.currentPath === '/Share') return; // Không cho quay lại khi đang ở thư mục gốc
-
-  //   // Cập nhật đường dẫn về thư mục cha
-  //   const pathSegments = this.currentPath.split('/');
-  //   pathSegments.pop(); // Loại bỏ thư mục hiện tại
-  //   this.currentPath = pathSegments.join('/') || '/Share';
-
-  //   console.log('Navigating up to:', this.currentPath);
-
-  //   // Lấy danh sách file ở thư mục cha
-  //   this.fetchFilesInFolder(this.currentPath);
-  // }
+    // Lấy danh sách file ở thư mục cha
+    this.fetchFiles();
+  }
 }

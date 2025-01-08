@@ -21,7 +21,12 @@
         <!-- Danh sách File -->
         <div class="card shadow file-list-card">
             <div class="card-header">
-                <h2 class="h5">Danh sách file từ máy chủ FTP</h2>
+                <div class="d-flex justify-content-between align-items-center">
+                   <h2 class="h5">Danh sách file từ máy chủ FTP</h2>
+                    <button class="btn btn-secondary" (click)="navigateUp()" [disabled]="currentPath === '/Share'">
+                        <i class="bi bi-arrow-up"></i>
+                    </button>
+                </div>
             </div>
             <div class="card-body">
                 <div class="file-actions">
@@ -41,7 +46,7 @@
                     </button>
                 </div>
                 <ul class="list-group file-list" *ngIf="files.length">
-                    <li *ngFor="let file of files" class="list-group-item d-flex align-items-center">
+                    <li *ngFor="let file of files" class="list-group-item d-flex align-items-center" (dblclick)="onFolderDoubleClick(file)">
                         <input type="checkbox" class="form-check-input me-2 ms-2"
                             (change)="toggleFileSelection(file, $event)" />
                         <ng-container [ngSwitch]="getFileType(file)">
@@ -54,7 +59,7 @@
                             <i *ngSwitchCase="'archive'" class="bi bi-file-earmark-zip text-warning me-2"></i>
                             <i *ngSwitchDefault class="bi bi-file-earmark me-2"></i>
                         </ng-container>
-                        {{ file }}
+                        {{ file.name }}
                     </li>
                 </ul>
             </div>

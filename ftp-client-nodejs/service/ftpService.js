@@ -25,15 +25,17 @@ async function connectToServer({ host, port, user, password }) {
     }
 }
 
-async function listFiles(config) {
+async function listFiles(config, path = '/Share') {
     const client = await connectToServer(config);
     try {
-        const workingDir = "/Share";
-        await client.cd(workingDir);
-        console.log("Current working directory:", workingDir);
+        await client.cd(path);
+        console.log("Current working directory:", path);
         const fileList = await client.list();
-        fileList.forEach(file => console.log(`File: ${file.name}, Type: ${file.type}`));
-        return fileList.map(file => file.name);
+        //fileList.forEach(file => console.log(`File: ${file.name}, Type: ${file.type}`));
+        return fileList.map(file => ({
+            name: file.name,
+            isFolder: file.type === 'd' || file.type === 2 // Đánh dấu nếu là thư mục
+        }));
     } finally {
         client.close();
     }

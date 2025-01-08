@@ -10,13 +10,14 @@ export class FtpService {
 
   constructor(private http: HttpClient) {}
 
-  listFiles(server: string, port: number, user: string, password: string): Observable<string[]> {
+  listFiles(server: string, port: number, user: string, password: string, path: string = '/Share'): Observable<{name: string, isFolder: boolean}[]> {
     const params = new HttpParams()
       .set('server', server)
       .set('port', port.toString())
       .set('user', user)
-      .set('password', password);
-    return this.http.get<string[]>(`${this.baseUrl}/list`, { params });
+      .set('password', password)
+      .set('path', path);
+    return this.http.get<{name: string, isFolder: boolean}[]>(`${this.baseUrl}/list`, { params });
   }
 
   //service new, tam thoi

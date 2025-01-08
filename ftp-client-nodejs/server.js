@@ -15,10 +15,12 @@ const upload = multer({ dest: "uploads/" });
 //API liệt kê file
 app.get("/ftp/list", async (req, res) => {
     try {
-        const { server, port, user, password } = req.query;
-        const fileList = await ftpService.listFiles({ host: server, port, user, password });
+        const { server, port, user, password, path } = req.query;
+        const directoryPath = path || '/Share';
+        const fileList = await ftpService.listFiles({ host: server, port, user, password }, directoryPath);
         res.json(fileList);
     } catch (error) {
+        console.error("Error listing files:", error);
         res.status(500).json({ error: error.message });
     }
 });
