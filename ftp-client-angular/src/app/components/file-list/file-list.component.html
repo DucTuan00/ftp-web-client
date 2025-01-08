@@ -1,0 +1,76 @@
+<div class="container mt-3">
+    <!-- Kết nối tới FTP -->
+    <div class="card shadow mb-4">
+        <div class="card-header">
+            <h2 class="h5">Kết nối tới máy chủ FTP</h2>
+        </div>
+        <div class="card-body">
+            <form (submit)="connectToServer($event)" class="ftp-connect-form">
+                <input [(ngModel)]="server" name="server" class="form-control" placeholder="Địa chỉ server" required />
+                <input [(ngModel)]="port" name="port" type="number" class="form-control" placeholder="Port" required />
+                <input [(ngModel)]="user" name="user" class="form-control" placeholder="Tên đăng nhập" required />
+                <input [(ngModel)]="password" name="password" type="password" class="form-control"
+                    placeholder="Mật khẩu" required />
+                <button type="submit" class="btn btn-primary">Kết nối</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Phần chính của ứng dụng (danh sách file và upload) -->
+    <div *ngIf="connected" class="main-content">
+        <!-- Danh sách File -->
+        <div class="card shadow file-list-card">
+            <div class="card-header">
+                <h2 class="h5">Danh sách file từ máy chủ FTP</h2>
+            </div>
+            <div class="card-body">
+                <div class="file-actions">
+                    <button (click)="fetchFiles()" class="btn btn-success mb-2">Lấy danh sách file</button>
+                    <button class="btn btn-success mb-2 ms-2" [disabled]="!selectedFiles.length"
+                        (click)="downloadSelectedFiles()">
+                        Tải file đã chọn
+                    </button>
+                    <button class="btn btn-primary mb-2 ms-2" [disabled]="!selectedFiles.length" (click)="renameFile()">
+                        Đổi tên file/thư mục
+                    </button>
+                    <button class="btn btn-danger mb-2" [disabled]="!selectedFiles.length" (click)="deleteFiles()">
+                        Xóa file/thư mục
+                    </button>
+                    <button class="btn btn-secondary mb-2 ms-2" (click)="createFolder()">
+                        Tạo thư mục mới
+                    </button>
+                </div>
+                <ul class="list-group file-list" *ngIf="files.length">
+                    <li *ngFor="let file of files" class="list-group-item d-flex align-items-center">
+                        <input type="checkbox" class="form-check-input me-2 ms-2"
+                            (change)="toggleFileSelection(file, $event)" />
+                        <ng-container [ngSwitch]="getFileType(file)">
+                            <i *ngSwitchCase="'folder'" class="bi bi-folder text-warning me-2"></i>
+                            <i *ngSwitchCase="'image'" class="bi bi-file-image text-primary me-2"></i>
+                            <i *ngSwitchCase="'text'" class="bi bi-file-text text-secondary me-2"></i>
+                            <i *ngSwitchCase="'pdf'" class="bi bi-file-pdf text-danger me-2"></i>
+                            <i *ngSwitchCase="'word'" class="bi bi-file-earmark-word text-info me-2"></i>
+                            <i *ngSwitchCase="'excel'" class="bi bi-file-earmark-spreadsheet text-success me-2"></i>
+                            <i *ngSwitchCase="'archive'" class="bi bi-file-earmark-zip text-warning me-2"></i>
+                            <i *ngSwitchDefault class="bi bi-file-earmark me-2"></i>
+                        </ng-container>
+                        {{ file }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Upload file -->
+        <div class="card shadow upload-card">
+            <div class="card-header">
+                <h2 class="h5">Tải file lên máy chủ FTP</h2>
+            </div>
+            <div class="card-body upload-file">
+                <div class="mb-3">
+                    <input type="file" (change)="onFileSelected($event)" class="form-control" />
+                </div>
+                <button (click)="uploadFile()" class="btn btn-primary w-100">Upload</button>
+            </div>
+        </div>
+    </div>
+</div>

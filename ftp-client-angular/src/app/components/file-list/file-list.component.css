@@ -1,0 +1,106 @@
+.container {
+    max-width: 1000px;
+    /* Tăng kích thước container */
+    margin: 20px auto;
+    padding: 10px;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 15px;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.btn {
+    font-weight: bold;
+}
+
+.list-group-item {
+    font-size: 16px;
+    border: none;
+    padding: 8px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.list-group-item:hover {
+    background-color: #f0f0f0;
+}
+
+.list-group-item i {
+    font-size: 1.25rem;
+}
+
+/* Kết nối FTP */
+.ftp-connect-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.ftp-connect-form input {
+    flex: 1;
+    min-width: 180px;
+}
+
+/* Phần chính của ứng dụng */
+.main-content {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Danh sách File */
+.file-list-card {
+    flex: 2;
+    /* Danh sách file chiếm 2 phần */
+    display: flex;
+    flex-direction: column;
+    /* Để các nút và danh sách nằm trên nhau */
+}
+
+.file-actions {
+    margin-bottom: 10px;
+}
+
+.file-list {
+    flex: 1;
+    /* Danh sách file chiếm phần còn lại */
+    max-height: 400px;
+    overflow-y: auto;
+    list-style-type: none;
+    padding: 0;
+}
+
+.file-list li {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.file-list li input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.file-list li i {
+    margin-right: 5px;
+}
+
+/* Upload File */
+.upload-card {
+    flex: 1;
+    /* Upload file chiếm 1 phần */
+}
+
+.upload-file {
+    text-align: center;
+}
+
+.upload-file button {
+    margin-top: 10px;
+}

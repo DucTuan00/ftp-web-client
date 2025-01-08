@@ -1,0 +1,8 @@
+<div>
+    <h2>Tải file lên máy chủ FTP</h2>
+    <form (submit)="upload()">
+      <input type="file" name="file" (change)="onFileSelected($event)" required>
+      <input [(ngModel)]="remotePath" name="remotePath" placeholder="Đường dẫn lưu trữ" required>
+      <button type="submit" [disabled]="!selectedFile">Upload</button>
+    </form>
+  </div>
