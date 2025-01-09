@@ -60,16 +60,15 @@ async function listFiles(config, path = '/Share') {
 //     }
 // }
 
-async function downloadFile(config, fileName) {
+async function downloadFile(config, fileName, currentPath = '/Share') {
     const client = await connectToServer(config);
-    
-    const remoteFolder = "/Share"; // Thư mục trên server FTP
+
     const localFolder = "D:/Downloads"; // Thư mục lưu trữ
     const localPath = path.join(localFolder, path.basename(fileName)); // Kết hợp thư mục với tên file
 
     try {
         // Chuyển đến thư mục đúng trên server
-        await client.cd(remoteFolder);
+        await client.cd(currentPath);
 
         const files = await client.list();
         const fileExists = files.some(file => file.name === path.basename(fileName));
@@ -107,22 +106,22 @@ async function uploadFile(config, localFilePath, remotePath) {
 }
 
 // Đổi tên file/thư mục
-async function renameFile(config, oldName, newName) {
+async function renameFile(config, oldName, newName, currentPath = '/Share') {
     const client = await connectToServer(config);
     try {
-        await client.rename(`/Share/${oldName}`, `/Share/${newName}`);
+        await client.rename(`${currentPath}/${oldName}`, `${currentPath}/${newName}`);
     } finally {
         client.close();
     }
 }
 
 // Xóa file/thư mục
-async function deleteFile(config, fileNames) {
+async function deleteFile(config, fileNames, currentPath = '/Share') {
     const client = await connectToServer(config);
     
     try {
         // Chuyển đến thư mục đúng trên server
-        await client.cd('/Share');
+        await client.cd(currentPath);
 
         for (const targetName of fileNames) {
             const currentDir = await client.pwd();
@@ -186,10 +185,28 @@ async function deleteFolderRecursive(client, folderName) {
 }
 
 // Tạo thư mục mới
-async function createFolder(config, folderName) {
+async function createFolder(config, folderName, currentPath = '/Share') {
     const client = await connectToServer(config);
     try {
-        await client.ensureDir(`/Share/${folderName}`);
+        await client.ensureDir(`${currentPath}/${folderName}`);
+    } finally {
+        client.close();
+    }
+}
+
+async function getFileDetails(config, fileName, currentPath = '/Share') {
+    const client = await connectToServer(config);
+    try {
+        await client.cd(currentPath);
+        const fileList = await client.list();
+        const file = fileList.find(f => f.name === fileName);
+        if (!file) {
+            throw new Error(`File "${fileName}" not found.`);
+        }
+        return {
+            size: file.size,
+            modified: file.modifiedAt.toString() // Assuming you have modified time
+        };
     } finally {
         client.close();
     }
@@ -202,4 +219,5 @@ module.exports = {
     renameFile,
     deleteFile,
     createFolder,
+    getFileDetails,
 };

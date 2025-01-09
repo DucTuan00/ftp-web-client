@@ -39,12 +39,13 @@ app.get("/ftp/list", async (req, res) => {
 
 // API tải file xuống
 app.post("/ftp/download", async (req, res) => {
-    const { server, port, user, password, remoteFile } = req.body;
+    const { server, port, user, password, remoteFile, currentPath } = req.body;
 
     try {
         const localPath = await ftpService.downloadFile(
             { host: server, port, user, password },
-            remoteFile
+            remoteFile,
+            currentPath
         );
         res.download(localPath, remoteFile, (err) => {
             if (err) {
@@ -62,11 +63,12 @@ app.post("/ftp/download", async (req, res) => {
 
 // API tải file lên
 app.post("/ftp/upload", upload.single("file"), async (req, res) => {
-    const { server, port, user, password, remotePath } = req.body;
+    const { server, port, user, password, remotePath, currentPath } = req.body;
     const localFilePath = req.file.path; // Đường dẫn file tạm trên server
+    const uploadPath = currentPath ? `${currentPath}/${req.file.originalname}` : `/Share/${req.file.originalname}`;
 
     try {
-        await ftpService.uploadFile({ host: server, port, user, password }, localFilePath, remotePath + '/' + req.file.originalname);
+        await ftpService.uploadFile({ host: server, port, user, password }, localFilePath, uploadPath);
         res.status(200).json({ message: "File uploaded successfully!" });
     } catch (error) {
         console.error("Error during upload:", error);
@@ -81,10 +83,10 @@ app.post("/ftp/upload", upload.single("file"), async (req, res) => {
 
 // API đổi tên file/thư mục
 app.post("/ftp/rename", async (req, res) => {
-    const { server, port, user, password, oldName, newName } = req.body;
+    const { server, port, user, password, oldName, newName, currentPath } = req.body;
 
     try {
-        await ftpService.renameFile({ host: server, port, user, password }, oldName, newName);
+        await ftpService.renameFile({ host: server, port, user, password }, oldName, newName, currentPath);
         res.status(200).json({ message: `Đổi tên thành công từ ${oldName} sang ${newName}` });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -95,7 +97,7 @@ app.post("/ftp/rename", async (req, res) => {
 app.post("/ftp/delete", async (req, res) => {
     console.log('Received request body:', req.body); // Log toàn bộ body để xem dữ liệu
 
-    const { server, port, user, password, fileNames } = req.body;
+    const { server, port, user, password, fileNames, currentPath } = req.body;
 
     console.log('Received fileNames:', fileNames); // Kiểm tra giá trị nhận được
     if (!fileNames || fileNames.length === 0) {
@@ -103,7 +105,7 @@ app.post("/ftp/delete", async (req, res) => {
     }
 
     try {
-        await ftpService.deleteFile({ host: server, port, user, password }, fileNames);
+        await ftpService.deleteFile({ host: server, port, user, password }, fileNames, currentPath);
         res.status(200).json({ message: `Đã xóa thành công '${fileNames}'` });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -112,15 +114,30 @@ app.post("/ftp/delete", async (req, res) => {
 
 // API tạo thư mục mới
 app.post("/ftp/create-folder", async (req, res) => {
-    const { server, port, user, password, folderName } = req.body;
+    const { server, port, user, password, folderName, currentPath } = req.body;
 
     try {
-        await ftpService.createFolder({ host: server, port, user, password }, folderName);
+        await ftpService.createFolder({ host: server, port, user, password }, folderName, currentPath);
         res.status(200).json({ message: `Thư mục '${folderName}' đã được tạo thành công.` });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
+
+// API xem chi tiết file
+app.get("/ftp/file-details", async (req, res) => {
+    try {
+        const { server, port, user, password, fileName, currentPath } = req.query;
+        const fileDetails = await ftpService.getFileDetails(
+            { host: server, port, user, password },
+            fileName,
+            currentPath
+        );
+        res.json(fileDetails);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+   });
 
 app.listen(port, () => {
     console.log(`FTP Server running on http://localhost:${port}`);

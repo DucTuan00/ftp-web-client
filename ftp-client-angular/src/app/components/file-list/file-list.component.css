@@ -35,7 +35,7 @@
 }
 
 .list-group li, .list-group input {
-    cursor: pointer;
+    cursor: pointer !important;
 }
 
 /* Kết nối FTP */
@@ -85,6 +85,7 @@
     align-items: center;
     padding: 8px 0;
     border-bottom: 1px solid #eee;
+    cursor: context-menu;
 }
 
 .file-list li input[type="checkbox"] {
@@ -107,4 +108,65 @@
 
 .upload-file button {
     margin-top: 10px;
+}
+
+.current-path {
+    font-style: italic;
+    font-weight: bold;
+    color: gray;
+}
+
+.file-details-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.file-details-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    min-width: 300px;
+    /* Đặt chiều rộng tối thiểu để không bị quá nhỏ */
+    max-width: 80%;
+}
+
+.file-details-content h3 {
+    margin-top: 0;
+    /* Loại bỏ khoảng cách trên mặc định của thẻ h3 */
+    border-bottom: 1px solid #eee;
+    /* Thêm một đường kẻ dưới tiêu đề */
+    padding-bottom: 10px;
+    /* Tạo khoảng cách giữa tiêu đề và nội dung */
+    margin-bottom: 10px;
+    /* Tạo khoảng cách dưới tiêu đề */
+}
+
+.context-menu {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 5px 0;
+    z-index: 1001;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.context-menu-item {
+    padding: 8px 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    /* Ngăn không cho text xuống dòng */
+}
+
+.context-menu-item:hover {
+    background-color: #f0f0f0;
 }

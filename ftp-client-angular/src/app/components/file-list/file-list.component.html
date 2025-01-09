@@ -1,4 +1,4 @@
-<div class="container mt-3">
+<div class="container mt-3" (click)="hideContextMenu()">
     <!-- Kết nối tới FTP -->
     <div class="card shadow mb-4">
         <div class="card-header">
@@ -22,7 +22,8 @@
         <div class="card shadow file-list-card">
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
-                   <h2 class="h5">Danh sách file từ máy chủ FTP</h2>
+                    <h2 class="h5">Danh sách file từ máy chủ FTP</h2>
+                    <span class="current-path">{{ currentPath }}</span>
                     <button class="btn btn-secondary" (click)="navigateUp()" [disabled]="currentPath === '/Share'">
                         <i class="bi bi-arrow-up"></i>
                     </button>
@@ -30,23 +31,20 @@
             </div>
             <div class="card-body">
                 <div class="file-actions">
+                    <input type="text" class="form-control mb-2" placeholder="Tìm kiếm..." 
+                    [(ngModel)]="searchTerm" (input)="searchFiles()"/>
                     <button (click)="fetchFiles()" class="btn btn-success mb-2">Lấy danh sách file</button>
-                    <button class="btn btn-success mb-2 ms-2" [disabled]="!selectedFiles.length"
-                        (click)="downloadSelectedFiles()">
-                        Tải file đã chọn
-                    </button>
-                    <button class="btn btn-primary mb-2 ms-2" [disabled]="!selectedFiles.length" (click)="renameFile()">
-                        Đổi tên file/thư mục
-                    </button>
-                    <button class="btn btn-danger mb-2" [disabled]="!selectedFiles.length" (click)="deleteFiles()">
-                        Xóa file/thư mục
-                    </button>
                     <button class="btn btn-secondary mb-2 ms-2" (click)="createFolder()">
                         Tạo thư mục mới
                     </button>
                 </div>
+                <hr>
+                <div *ngIf="files.length === 0" class="text-center mt-3">
+                    <p>Thư mục trống.</p>
+                </div>
                 <ul class="list-group file-list" *ngIf="files.length">
-                    <li *ngFor="let file of files" class="list-group-item d-flex align-items-center" (dblclick)="onFolderDoubleClick(file)">
+                    <li *ngFor="let file of files" class="list-group-item d-flex align-items-center" 
+                    (dblclick)="onFolderDoubleClick(file)" (contextmenu)="onContextMenu($event, file)">
                         <input type="checkbox" class="form-check-input me-2 ms-2"
                             (change)="toggleFileSelection(file, $event)" />
                         <ng-container [ngSwitch]="getFileType(file)">
@@ -76,6 +74,18 @@
                 </div>
                 <button (click)="uploadFile()" class="btn btn-primary w-100">Upload</button>
             </div>
+        </div>
+    </div>
+    <div class="context-menu" *ngIf="contextMenuVisible" [style.left.px]="contextMenuX" [style.top.px]="contextMenuY">
+        <div class="context-menu-item" *ngFor="let item of contextMenuItems" (click)="executeAction(item.action)">{{item.label}}</div>
+    </div>
+    <div *ngIf="selectedFileDetails" class="file-details-popup">
+        <div class="file-details-content">
+            <h3>Thông tin chi tiết</h3>
+            <p>Tên: {{ selectedFileDetails.name }}</p>
+            <p *ngIf="!selectedFileDetails.isFolder">Kích thước: {{ selectedFileDetails.size }} bytes</p>
+            <p>Thời gian sửa đổi: {{ selectedFileDetails.modified }}</p>
+            <button class="btn btn-secondary" (click)="closeDetails()">Đóng</button>
         </div>
     </div>
 </div>

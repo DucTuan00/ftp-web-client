@@ -31,6 +31,14 @@ export class FileListComponent {
   selectedFile!: File;
   selectedFiles: string[] = [];
   currentPath: string = '/Share';
+  searchTerm: string = '';
+  originalFiles: { name: string, isFolder: boolean }[] = []; // Lưu trữ danh sách file gốc
+  selectedFileDetails: any = null;
+  contextMenuVisible = false;
+  contextMenuX = 0;
+  contextMenuY = 0;
+  selectedFileForMenu: any = null;
+  contextMenuItems: any[] = [];
 
   constructor(private ftpService: FtpService) {}
 
@@ -50,6 +58,16 @@ export class FileListComponent {
       );
   }
 
+  // Tìm kiếm
+  searchFiles(): void {
+    if (!this.searchTerm) {
+      this.files = [...this.originalFiles]; // Reset lại danh sách nếu searchterm rỗng
+      return;
+    }
+    const lowerSearchTerm = this.searchTerm.toLowerCase();
+    this.files = this.originalFiles.filter(file => file.name.toLowerCase().includes(lowerSearchTerm));
+  }
+
   // Lấy danh sách file
   fetchFiles(): void {
     if (!this.connected) {
@@ -58,7 +76,10 @@ export class FileListComponent {
     }
     this.ftpService.listFiles(this.server, this.port, this.user, this.password, this.currentPath)
       .subscribe(
-        (data) => this.files = data,
+        (data) => {
+          this.files = data;
+          this.originalFiles = [...data]; // Lưu lại danh sách file gốc
+        },
         (error) => alert('Lỗi khi lấy danh sách file: ' + error.message)
       );
   }
@@ -103,7 +124,7 @@ export class FileListComponent {
     console.log("User:", this.user);
     console.log("Password:", this.password);
     if (this.selectedFile) {
-      this.ftpService.uploadFile(this.server, this.port, this.user, this.password, this.selectedFile)
+      this.ftpService.uploadFile(this.server, this.port, this.user, this.password, this.selectedFile, this.currentPath)
         .subscribe({
           next: (response) => {
             alert('File uploaded successfully!');
@@ -137,7 +158,7 @@ export class FileListComponent {
     };
 
     this.selectedFiles.forEach((file) => {
-      this.ftpService.downloadFile(serverConfig, file).subscribe(
+      this.ftpService.downloadFile(serverConfig, file, this.currentPath).subscribe(
         (blob) => {
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -159,24 +180,33 @@ export class FileListComponent {
       alert('Vui lòng chọn một file hoặc thư mục để đổi tên!');
       return;
     }
-  
+
     const oldName = this.selectedFiles[0];
-    // Tách tên file và phần mở rộng
-    const fileExtension = oldName.substring(oldName.lastIndexOf('.'));
-    const fileNameWithoutExtension = oldName.substring(0, oldName.lastIndexOf('.'));
     
-    // Yêu cầu người dùng nhập tên mới mà không đổi phần mở rộng
-    const newNameWithoutExtension = prompt(`Nhập tên mới cho file "${fileNameWithoutExtension}":`);
-    
-    if (!newNameWithoutExtension || newNameWithoutExtension.trim() === '') {
-      alert('Tên không hợp lệ!');
+    // Kiểm tra xem item có phải là folder không
+    const isFolder = this.files.find(f => f.name === oldName)?.isFolder;
+
+    let newName: string | null = null;
+    if (isFolder) {
+      // Nếu là folder thì chỉ lấy tên mới
+      newName = prompt(`Nhập tên mới cho thư mục "${oldName}":`);
+    } else {
+      // Nếu là file
+      const fileExtension = oldName.substring(oldName.lastIndexOf('.'));
+      const fileNameWithoutExtension = oldName.substring(0, oldName.lastIndexOf('.'));
+
+      const newNameWithoutExtension = prompt(`Nhập tên mới cho file "${fileNameWithoutExtension}":`);
+      if (newNameWithoutExtension) {
+        newName = newNameWithoutExtension + fileExtension;
+      }
+    }
+
+    if (!newName || newName.trim() === '') {
+      //alert('Tên không hợp lệ!');
       return;
     }
 
-    // Kết hợp lại tên file mới với phần mở rộng cũ
-    const newName = newNameWithoutExtension + fileExtension;
-  
-    this.ftpService.renameFile(this.server, this.port, this.user, this.password, oldName, newName)
+    this.ftpService.renameFile(this.server, this.port, this.user, this.password, oldName, newName, this.currentPath)
       .subscribe({
         next: () => {
           alert('Đổi tên thành công!');
@@ -209,7 +239,7 @@ export class FileListComponent {
         return;
     }
   
-    this.ftpService.deleteFiles(this.server, this.port, this.user, this.password, this.selectedFiles)
+    this.ftpService.deleteFiles(this.server, this.port, this.user, this.password, this.selectedFiles, this.currentPath)
       .subscribe({
         next: () => {
           alert('Xóa thành công!');
@@ -231,7 +261,7 @@ export class FileListComponent {
       return;
     }
   
-    this.ftpService.createFolder(this.server, this.port, this.user, this.password, folderName)
+    this.ftpService.createFolder(this.server, this.port, this.user, this.password, folderName, this.currentPath)
       .subscribe({
         next: () => {
           alert('Tạo thư mục thành công!');
@@ -269,5 +299,62 @@ export class FileListComponent {
 
     // Lấy danh sách file ở thư mục cha
     this.fetchFiles();
+  }
+
+  onContextMenu(event: MouseEvent, file: { name: string, isFolder: boolean }): void {
+    event.preventDefault();
+    this.contextMenuX = event.clientX;
+    this.contextMenuY = event.clientY;
+    this.contextMenuVisible = true;
+    this.selectedFileForMenu = file;
+    this.contextMenuItems = this.getMenuItems(file);
+  }
+
+  getMenuItems(file: { name: string, isFolder: boolean }): any[] {
+    const items = [];
+    items.push({ label: 'Xem chi tiết', action: 'showDetails' });
+    if (this.selectedFiles.length > 0) {
+      items.push({ label: 'Tải file đã chọn', action: 'downloadSelectedFiles' })
+    }
+    items.push({ label: 'Đổi tên', action: 'renameFile' });
+    items.push({ label: 'Xóa', action: 'deleteFiles' });
+    return items;
+  }
+
+  hideContextMenu() :void {
+    this.contextMenuVisible = false;
+  }
+
+  showDetails(): void {
+    this.contextMenuVisible = false; // Ẩn menu ngữ cảnh
+    this.selectedFileDetails = this.selectedFileForMenu; // Truyền thông tin file vào selectedFileDetails
+    if (!this.selectedFileForMenu.isFolder) {
+      this.ftpService.getFileDetails(this.server, this.port, this.user, this.password, this.selectedFileForMenu.name, this.currentPath).subscribe(details => {
+        this.selectedFileDetails = { ...this.selectedFileDetails, ...details };
+        console.log(this.selectedFileDetails)
+      }, error => console.log(error))
+    }
+  }
+
+  closeDetails(): void {
+    this.selectedFileDetails = null;
+  }
+
+  executeAction(action: string) {
+    this.contextMenuVisible = false;
+    switch (action) {
+      case 'showDetails':
+        this.showDetails();
+        break;
+      case 'downloadSelectedFiles':
+        this.downloadSelectedFiles();
+        break;
+      case 'renameFile':
+        this.renameFile();
+        break;
+      case 'deleteFiles':
+        this.deleteFiles();
+        break;
+    }
   }
 }
