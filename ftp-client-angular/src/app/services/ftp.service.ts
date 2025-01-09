@@ -21,17 +21,6 @@ export class FtpService {
     return this.http.get<{name: string, isFolder: boolean, modified?: string, size?: number}[]>(`${this.baseUrl}/list`, { params });
   }
 
-  //service new, tam thoi
-  // listFiles(server: string, port: number, user: string, password: string, path: string): Observable<string[]> {
-  //   const params = new HttpParams()
-  //     .set('server', server)
-  //     .set('port', port.toString())
-  //     .set('user', user)
-  //     .set('password', password)
-  //     .set('path', path); // Thêm tham số path để xác định folder cần lấy nội dung
-  //   return this.http.get<string[]>(`${this.baseUrl}/list`, { params });
-  // }
-
   uploadFile(server: string, port: number, user: string, password: string, file: File, currentPath: string = '/Share'): Observable<string> {
     const formData: FormData = new FormData();
     formData.append('file', file);

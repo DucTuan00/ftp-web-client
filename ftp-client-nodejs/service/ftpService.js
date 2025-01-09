@@ -131,8 +131,6 @@ async function deleteFile(config, fileNames, currentPath = '/Share') {
 
             // Lấy danh sách file/thư mục
             const files = await client.list();
-            console.log('Files from server:', files);
-            console.log('Files:', files.map(file => file.name));
 
             // Kiểm tra nếu file/thư mục tồn tại
             const targetFile = files.find(file => file.name === targetName);

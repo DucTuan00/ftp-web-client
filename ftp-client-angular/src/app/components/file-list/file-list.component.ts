@@ -127,7 +127,6 @@ export class FileListComponent {
       this.ftpService.uploadFile(this.server, this.port, this.user, this.password, this.selectedFile, this.currentPath)
         .subscribe({
           next: (response) => {
-            alert('Tải file lên thành công!');
             this.fetchFiles(); // Cập nhật danh sách file
           },
           error: (error) => {
@@ -209,11 +208,8 @@ export class FileListComponent {
     this.ftpService.renameFile(this.server, this.port, this.user, this.password, oldName, newName, this.currentPath)
       .subscribe({
         next: () => {
-          alert('Đổi tên thành công!');
           this.fetchFiles(); // Cập nhật danh sách file
 
-          // Sau khi đổi tên thành công, xóa file cũ khỏi selectedFiles
-          // Đảm bảo rằng chỉ một file được chọn sau khi đổi tên
           const index = this.selectedFiles.indexOf(oldName);
           if (index > -1) {
             this.selectedFiles.splice(index, 1);
@@ -227,10 +223,6 @@ export class FileListComponent {
   }
   
   deleteFiles(): void {
-    if (!confirm('Bạn có chắc chắn muốn xóa các file/thư mục đã chọn?')) {
-      return;
-    }
-
     // Kiểm tra selectedFiles trước khi gọi deleteFiles
     console.log('Selected files:', this.selectedFiles);
     
@@ -242,7 +234,6 @@ export class FileListComponent {
     this.ftpService.deleteFiles(this.server, this.port, this.user, this.password, this.selectedFiles, this.currentPath)
       .subscribe({
         next: () => {
-          alert('Xóa thành công!');
           this.selectedFiles = []; // Xóa danh sách chọn
           this.fetchFiles(); // Cập nhật danh sách file
         },
@@ -264,7 +255,6 @@ export class FileListComponent {
     this.ftpService.createFolder(this.server, this.port, this.user, this.password, folderName, this.currentPath)
       .subscribe({
         next: () => {
-          alert('Tạo thư mục thành công!');
           this.fetchFiles(); // Cập nhật danh sách file
         },
         error: (error) => {
