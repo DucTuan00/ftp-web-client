@@ -248,7 +248,6 @@ export class FileListComponent {
     const folderName = prompt('Nhập tên thư mục mới:');
     
     if (!folderName || folderName.trim() === '') {
-      alert('Tên thư mục không hợp lệ!');
       return;
     }
   
