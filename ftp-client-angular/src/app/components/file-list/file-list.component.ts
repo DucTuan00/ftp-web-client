@@ -27,12 +27,12 @@ export class FileListComponent {
   user: string = '';
   password: string = '';
   connected: boolean = false;
-  files: { name: string, isFolder: boolean }[] = [];
+  files: { name: string, isFolder: boolean, modified?: string, size?: number }[] = [];
   selectedFile!: File;
   selectedFiles: string[] = [];
   currentPath: string = '/Share';
   searchTerm: string = '';
-  originalFiles: { name: string, isFolder: boolean }[] = []; // Lưu trữ danh sách file gốc
+  originalFiles: { name: string, isFolder: boolean, modified?: string, size?: number }[] = []; // Lưu trữ danh sách file gốc
   selectedFileDetails: any = null;
   contextMenuVisible = false;
   contextMenuX = 0;
@@ -127,7 +127,7 @@ export class FileListComponent {
       this.ftpService.uploadFile(this.server, this.port, this.user, this.password, this.selectedFile, this.currentPath)
         .subscribe({
           next: (response) => {
-            alert('File uploaded successfully!');
+            alert('Tải file lên thành công!');
             this.fetchFiles(); // Cập nhật danh sách file
           },
           error: (error) => {
@@ -328,12 +328,13 @@ export class FileListComponent {
   showDetails(): void {
     this.contextMenuVisible = false; // Ẩn menu ngữ cảnh
     this.selectedFileDetails = this.selectedFileForMenu; // Truyền thông tin file vào selectedFileDetails
-    if (!this.selectedFileForMenu.isFolder) {
-      this.ftpService.getFileDetails(this.server, this.port, this.user, this.password, this.selectedFileForMenu.name, this.currentPath).subscribe(details => {
-        this.selectedFileDetails = { ...this.selectedFileDetails, ...details };
-        console.log(this.selectedFileDetails)
-      }, error => console.log(error))
+    if (this.selectedFileForMenu.isFolder) {
+      return;
     }
+    this.ftpService.getFileDetails(this.server, this.port, this.user, this.password, this.selectedFileForMenu.name, this.currentPath).subscribe(details => {
+      this.selectedFileDetails = { ...this.selectedFileDetails, ...details };
+      console.log(this.selectedFileDetails)
+    }, error => console.log(error))
   }
 
   closeDetails(): void {
@@ -355,6 +356,22 @@ export class FileListComponent {
       case 'deleteFiles':
         this.deleteFiles();
         break;
+    }
+  }
+
+  formatFileSize(size: number | undefined): string {
+    if (size === undefined) {
+      return '-';
+    }
+
+    if (size < 1024) {
+      return size + ' bytes';
+    } else if (size < 1024 * 1024) {
+      return (size / 1024).toFixed(2) + ' KB';
+    } else if (size < 1024 * 1024 * 1024) {
+      return (size / (1024 * 1024)).toFixed(2) + ' MB';
+    } else {
+      return (size / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
     }
   }
 }

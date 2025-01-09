@@ -38,28 +38,45 @@
                         Tạo thư mục mới
                     </button>
                 </div>
-                <hr>
                 <div *ngIf="files.length === 0" class="text-center mt-3">
                     <p>Thư mục trống.</p>
                 </div>
-                <ul class="list-group file-list" *ngIf="files.length">
-                    <li *ngFor="let file of files" class="list-group-item d-flex align-items-center" 
-                    (dblclick)="onFolderDoubleClick(file)" (contextmenu)="onContextMenu($event, file)">
-                        <input type="checkbox" class="form-check-input me-2 ms-2"
-                            (change)="toggleFileSelection(file, $event)" />
-                        <ng-container [ngSwitch]="getFileType(file)">
-                            <i *ngSwitchCase="'folder'" class="bi bi-folder text-warning me-2"></i>
-                            <i *ngSwitchCase="'image'" class="bi bi-file-image text-primary me-2"></i>
-                            <i *ngSwitchCase="'text'" class="bi bi-file-text text-secondary me-2"></i>
-                            <i *ngSwitchCase="'pdf'" class="bi bi-file-pdf text-danger me-2"></i>
-                            <i *ngSwitchCase="'word'" class="bi bi-file-earmark-word text-info me-2"></i>
-                            <i *ngSwitchCase="'excel'" class="bi bi-file-earmark-spreadsheet text-success me-2"></i>
-                            <i *ngSwitchCase="'archive'" class="bi bi-file-earmark-zip text-warning me-2"></i>
-                            <i *ngSwitchDefault class="bi bi-file-earmark me-2"></i>
-                        </ng-container>
-                        {{ file.name }}
-                    </li>
-                </ul>
+                <div class="table-responsive" *ngIf="files.length">
+                    <table class="table file-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Tên</th>
+                                <th>Ngày chỉnh sửa</th>
+                                <th>Kích cỡ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let file of files" (dblclick)="onFolderDoubleClick(file)"
+                                (contextmenu)="onContextMenu($event, file)">
+                                <td>
+                                    <input type="checkbox" class="form-check-input" (change)="toggleFileSelection(file, $event)" />
+                                </td>
+                                <td class="file-name">
+                                    <ng-container [ngSwitch]="getFileType(file)">
+                                        <i *ngSwitchCase="'folder'" class="bi bi-folder text-warning me-1"></i>
+                                        <i *ngSwitchCase="'image'" class="bi bi-file-image text-primary me-1"></i>
+                                        <i *ngSwitchCase="'text'" class="bi bi-file-text text-secondary me-1"></i>
+                                        <i *ngSwitchCase="'pdf'" class="bi bi-file-pdf text-danger me-1"></i>
+                                        <i *ngSwitchCase="'word'" class="bi bi-file-earmark-word text-info me-1"></i>
+                                        <i *ngSwitchCase="'excel'" class="bi bi-file-earmark-spreadsheet text-success me-1"></i>
+                                        <i *ngSwitchCase="'archive'" class="bi bi-file-earmark-zip text-warning me-1"></i>
+                                        <i *ngSwitchDefault class="bi bi-file-earmark me-1"></i>
+                                    </ng-container>
+                                    <span class="file-name-text" title="{{ file.name }}">{{ file.name }}</span>
+                                </td>
+                                <td class="modified-date">{{ file.modified }}</td>
+                                <td class="file-size" *ngIf="!file.isFolder">{{ formatFileSize(file.size) }}</td>
+                                <td class="file-size" *ngIf="file.isFolder">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -72,7 +89,7 @@
                 <div class="mb-3">
                     <input type="file" (change)="onFileSelected($event)" class="form-control" />
                 </div>
-                <button (click)="uploadFile()" class="btn btn-primary w-100">Upload</button>
+                <button (click)="uploadFile()" class="btn btn-primary w-100">Tải lên</button>
             </div>
         </div>
     </div>
@@ -83,7 +100,7 @@
         <div class="file-details-content">
             <h3>Thông tin chi tiết</h3>
             <p>Tên: {{ selectedFileDetails.name }}</p>
-            <p *ngIf="!selectedFileDetails.isFolder">Kích thước: {{ selectedFileDetails.size }} bytes</p>
+            <p *ngIf="!selectedFileDetails.isFolder">Kích thước: {{ formatFileSize(selectedFileDetails.size) }}</p>
             <p>Thời gian sửa đổi: {{ selectedFileDetails.modified }}</p>
             <button class="btn btn-secondary" (click)="closeDetails()">Đóng</button>
         </div>

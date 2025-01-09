@@ -34,7 +34,9 @@ async function listFiles(config, path = '/Share') {
         //fileList.forEach(file => console.log(`File: ${file.name}, Type: ${file.type}`));
         return fileList.map(file => ({
             name: file.name,
-            isFolder: file.type === 'd' || file.type === 2 // Đánh dấu nếu là thư mục
+            isFolder: file.type === 'd' || file.type === 2, // Đánh dấu nếu là thư mục
+            modified: file.modifiedAt.toLocaleString(),
+            size: file.size
         }));
     } finally {
         client.close();
@@ -205,7 +207,7 @@ async function getFileDetails(config, fileName, currentPath = '/Share') {
         }
         return {
             size: file.size,
-            modified: file.modifiedAt.toString() // Assuming you have modified time
+            modified: file.modifiedAt.toLocaleString()
         };
     } finally {
         client.close();

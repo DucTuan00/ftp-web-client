@@ -1,6 +1,5 @@
 .container {
     max-width: 1000px;
-    /* Tăng kích thước container */
     margin: 20px auto;
     padding: 10px;
 }
@@ -17,25 +16,6 @@
 
 .btn {
     font-weight: bold;
-}
-
-.list-group-item {
-    font-size: 16px;
-    border: none;
-    padding: 8px 15px;
-    border-bottom: 1px solid #eee;
-}
-
-.list-group-item:hover {
-    background-color: #f0f0f0;
-}
-
-.list-group-item i {
-    font-size: 1.25rem;
-}
-
-.list-group li, .list-group input {
-    cursor: pointer !important;
 }
 
 /* Kết nối FTP */
@@ -61,45 +41,101 @@
 /* Danh sách File */
 .file-list-card {
     flex: 2;
-    /* Danh sách file chiếm 2 phần */
     display: flex;
     flex-direction: column;
-    /* Để các nút và danh sách nằm trên nhau */
 }
 
 .file-actions {
     margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.file-actions button {
+    white-space: nowrap;
 }
 
 .file-list {
     flex: 1;
-    /* Danh sách file chiếm phần còn lại */
     max-height: 400px;
     overflow-y: auto;
     list-style-type: none;
     padding: 0;
 }
 
-.file-list li {
-    display: flex;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-    cursor: context-menu;
+.file-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
 }
 
-.file-list li input[type="checkbox"] {
-    margin-right: 10px;
+.file-table th,
+.file-table td {
+    word-wrap: break-word;
+    padding: 8px;  
+    white-space: nowrap; 
+    overflow: hidden;
+    vertical-align: middle;
+    /* text-overflow: ellipsis; */
 }
 
-.file-list li i {
-    margin-right: 5px;
+.file-table th {
+    background-color: #f0f0f0;
+    position: sticky;
+    top: 0; 
+    z-index: 1; 
+}
+
+.file-table tr:hover {
+    background-color: #ccc !important;
+    cursor: pointer !important;
+}
+
+.file-table tr {
+    transition: background-color 0.2s ease;
+}
+
+.file-table th:first-child,
+.file-table td:first-child {
+    width: 6%; 
+    white-space: nowrap;
+}
+
+.file-table .file-name {
+    width: 100%;
+}
+
+.file-table .file-name-text {
+    display: inline-block;
+    max-width: 100%;
+    text-overflow: ellipsis;
+}
+
+.file-table .modified-date {
+    white-space: nowrap;
+    width: 25%;
+}
+
+.file-table .file-size {
+    white-space: nowrap;
+    width: 15%; 
+}
+
+.file-table td input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 /* Upload File */
 .upload-card {
     flex: 1;
-    /* Upload file chiếm 1 phần */
 }
 
 .upload-file {
@@ -135,19 +171,14 @@
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     min-width: 300px;
-    /* Đặt chiều rộng tối thiểu để không bị quá nhỏ */
     max-width: 80%;
 }
 
 .file-details-content h3 {
     margin-top: 0;
-    /* Loại bỏ khoảng cách trên mặc định của thẻ h3 */
     border-bottom: 1px solid #eee;
-    /* Thêm một đường kẻ dưới tiêu đề */
     padding-bottom: 10px;
-    /* Tạo khoảng cách giữa tiêu đề và nội dung */
     margin-bottom: 10px;
-    /* Tạo khoảng cách dưới tiêu đề */
 }
 
 .context-menu {
@@ -164,7 +195,6 @@
     padding: 8px 20px;
     cursor: pointer;
     white-space: nowrap;
-    /* Ngăn không cho text xuống dòng */
 }
 
 .context-menu-item:hover {
